@@ -15,9 +15,4 @@ $EM_CONF[$_EXTKEY] = [
             'form' => '8.7.0-9.6.99',
         ],
     ],
-    'autoload' => [
-        'psr-4' => [
-            'Extrameile\\EmFormRepeatablesave\\' => 'Classes/',
-        ],
-    ],
 ];
