@@ -33,7 +33,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
 {
 
     /**
-     * @var array
+     * @var array<mixed>
      */
     protected $defaultOptions = [
         'table' => null,
@@ -53,6 +53,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      * Executes this finisher
      * @see AbstractFinisher::execute()
      *
+     * @return string|null
      * @throws FinisherException
      */
     protected function executeInternal()
@@ -68,15 +69,17 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
             $this->options = $option;
             $this->process($optionKey);
         }
+
+        return null;
     }
 
     /**
      * Prepare data for saving to database
      *
-     * @param array $elementsConfiguration
-     * @param array $databaseData
+     * @param array<array> $elementsConfiguration
+     * @param array<string, string> $databaseData
      * @param string $prefix
-     * @param array $values
+     * @param array<string> $values
      * @return mixed
      */
     protected function prepareData(array $elementsConfiguration, array $databaseData, $prefix = '', $values = [])
@@ -85,21 +88,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
             $values = $this->getFormValues();
         }
         foreach ($values as $elementIdentifier => $elementValue) {
-            if (
-                ($elementValue === null || $elementValue === '')
-                && isset($elementsConfiguration[$elementIdentifier])
-                && isset($elementsConfiguration[$elementIdentifier]['skipIfValueIsEmpty'])
-                && $elementsConfiguration[$elementIdentifier]['skipIfValueIsEmpty'] === true
-            ) {
-                continue;
-            }
-
-            $element = $this->getElementByIdentifier($prefix . $elementIdentifier);
-            if (
-                (!$element instanceof FormElementInterface && !StringUtility::beginsWith($elementIdentifier, '__'))
-                || !isset($elementsConfiguration[$elementIdentifier])
-                || !isset($elementsConfiguration[$elementIdentifier]['mapOnDatabaseColumn'])
-            ) {
+            if ($this->ignoreElement($elementsConfiguration, $prefix, $elementIdentifier, $elementValue)) {
                 continue;
             }
 
@@ -128,12 +117,43 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
     }
 
     /**
+     * Check if an element should be ignored while processing
+     *
+     * @param array<array> $elementsConfiguration
+     * @param string $prefix
+     * @param string $elementIdentifier
+     * @param mixed $elementValue
+     */
+    protected function ignoreElement(array $elementsConfiguration, $prefix, $elementIdentifier, $elementValue): bool
+    {
+        if (
+            ($elementValue === null || $elementValue === '')
+            && isset($elementsConfiguration[$elementIdentifier])
+            && isset($elementsConfiguration[$elementIdentifier]['skipIfValueIsEmpty'])
+            && $elementsConfiguration[$elementIdentifier]['skipIfValueIsEmpty'] === true
+        ) {
+            return true;
+        }
+
+        $element = $this->getElementByIdentifier($prefix . $elementIdentifier);
+        if (
+            (!$element instanceof FormElementInterface && !StringUtility::beginsWith($elementIdentifier, '__'))
+            || !isset($elementsConfiguration[$elementIdentifier])
+            || !isset($elementsConfiguration[$elementIdentifier]['mapOnDatabaseColumn'])
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Perform the current database operation
      *
      * @param int $iterationCount
      * @throws FinisherException
      */
-    protected function process(int $iterationCount)
+    protected function process(int $iterationCount): void
     {
         $this->throwExceptionOnInconsistentConfiguration();
 
@@ -142,19 +162,36 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
         $databaseColumnMappingsConfiguration = $this->parseOption('databaseColumnMappings');
         $repeat = $this->parseOption('repeat');
 
+        if (!\is_string($table)) {
+            throw new FinisherException('Table value is invalid');
+        }
+        if (!\is_array($elementsConfiguration)) {
+            throw new FinisherException('Elements array for table "' . $table . '" is invalid');
+        }
+        if (!\is_string($repeat)) {
+            $repeat = '';
+        }
+
         $this->databaseConnection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
 
         $databaseData = [];
-        foreach ($databaseColumnMappingsConfiguration as $databaseColumnName => $databaseColumnConfiguration) {
-            $value = $this->parseOption('databaseColumnMappings.' . $databaseColumnName . '.value');
-            if (
-                empty($value)
-                && $databaseColumnConfiguration['skipIfValueIsEmpty'] === true
-            ) {
-                continue;
-            }
+        if (\is_array($databaseColumnMappingsConfiguration)) {
+            foreach ($databaseColumnMappingsConfiguration as $databaseColumnName => $databaseColumnConfiguration) {
+                $databaseColumnName = (string) $databaseColumnName;
+                $value = $this->parseOption('databaseColumnMappings.' . $databaseColumnName . '.value');
+                if (
+                    empty($value)
+                    && $databaseColumnConfiguration['skipIfValueIsEmpty'] === true
+                ) {
+                    continue;
+                }
 
-            $databaseData[$databaseColumnName] = $value;
+                if (!\is_string($value)) {
+                    throw new FinisherException('Mapping for column "' . $databaseColumnName . '" of table "' . $table . '" is invalid');
+                }
+
+                $databaseData[$databaseColumnName] = $value;
+            }
         }
 
         if ($repeat) {
@@ -166,7 +203,16 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
         }
     }
 
-    protected function processRepeat($repeat, $elementsConfiguration, $databaseData, $table, $iterationCount)
+    /**
+     * processes data repeatedly
+     *
+     * @param string $repeat Container which is repeatable
+     * @param array<array> $elementsConfiguration
+     * @param array<string, string> $databaseData
+     * @param string $table
+     * @param int $iterationCount
+     */
+    protected function processRepeat($repeat, $elementsConfiguration, $databaseData, $table, $iterationCount): void
     {
         $values = $this->getFormValues();
         // container does not exist
@@ -190,12 +236,12 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      * Save or insert the values from
      * $databaseData into the table $table
      *
-     * @param array $databaseData
+     * @param array<string, string>  $databaseData
      * @param string $table
      * @param int $iterationCount
      * @param int|null $repeatCount
      */
-    protected function saveToDatabase(array $databaseData, string $table, int $iterationCount, ?int $repeatCount = null)
+    protected function saveToDatabase(array $databaseData, string $table, int $iterationCount, ?int $repeatCount = null): void
     {
         if (!empty($databaseData)) {
             if ($this->options['mode'] === 'update') {
@@ -226,7 +272,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      *
      * @throws FinisherException
      */
-    protected function throwExceptionOnInconsistentConfiguration()
+    protected function throwExceptionOnInconsistentConfiguration(): void
     {
         if (
             $this->options['mode'] === 'update'
@@ -242,7 +288,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
     /**
      * Returns the values of the submitted form
      *
-     * @return []
+     * @return array<mixed>
      */
     protected function getFormValues(): array
     {
@@ -253,9 +299,8 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      * Returns a form element object for a given identifier.
      *
      * @param string $elementIdentifier
-     * @return \TYPO3\CMS\Form\Domain\Model\FormElements\FormElementInterface|null
      */
-    protected function getElementByIdentifier(string $elementIdentifier)
+    protected function getElementByIdentifier(string $elementIdentifier): ?FormElementInterface
     {
         return $this
             ->finisherContext
