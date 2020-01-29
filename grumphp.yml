@@ -1,0 +1,6 @@
+imports:
+  - { resource: .Build/vendor/extrameile/grumphp-conventions-typo3/grumphp.yml }
+
+parameters:
+  convention.phpstan_level: max
+  convention.phpstan_configuration: "phpstan.neon"
