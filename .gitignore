@@ -1,0 +1,9 @@
+.Build
+composer.lock
+
+# Ignore IDE files
+*.idea
+*.iml
+nbproject
+*.swp
+*.kdev4
