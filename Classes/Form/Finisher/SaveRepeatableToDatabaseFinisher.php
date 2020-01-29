@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Extrameile\EmFormRepeatablesave\Form\Finisher;
 
@@ -56,6 +57,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      */
     protected function executeInternal()
     {
+        $options = [];
         if (isset($this->options['table'])) {
             $options[] = $this->options;
         } else {
@@ -79,7 +81,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      */
     protected function prepareData(array $elementsConfiguration, array $databaseData, $prefix = '', $values = [])
     {
-        if (count($values) === 0) {
+        if (\count($values) === 0) {
             $values = $this->getFormValues();
         }
         foreach ($values as $elementIdentifier => $elementValue) {
@@ -113,8 +115,8 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
                 } else {
                     $elementValue = $elementValue->getOriginalResource()->getProperty('uid_local');
                 }
-            } elseif (is_array($elementValue)) {
-                $elementValue = implode(',', $elementValue);
+            } elseif (\is_array($elementValue)) {
+                $elementValue = \implode(',', $elementValue);
             } elseif ($elementValue instanceof \DateTimeInterface) {
                 $format = $elementsConfiguration[$elementIdentifier]['dateFormat'] ?? 'U';
                 $elementValue = $elementValue->format($format);
@@ -129,7 +131,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      * Perform the current database operation
      *
      * @param int $iterationCount
-     * @throws \TYPO3\CMS\Form\Domain\Finishers\Exception\FinisherException
+     * @throws FinisherException
      */
     protected function process(int $iterationCount)
     {
@@ -171,7 +173,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
         if (isset($values[$repeat])) {
             $this->throwExceptionOnInconsistentConfiguration();
         }
-        $count = count($values[$repeat]);
+        $count = \count($values[$repeat]);
         for ($i = 0; $i < $count; $i++) {
             $databaseData = $this->prepareData($elementsConfiguration, $databaseData, $repeat . '.' . $i . '.', $values[$repeat][$i]);
             $this->saveToDatabase($databaseData, $table, $iterationCount, $i);
@@ -193,7 +195,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      * @param int $iterationCount
      * @param int|null $repeatCount
      */
-    protected function saveToDatabase(array $databaseData, string $table, int $iterationCount, int $repeatCount = null)
+    protected function saveToDatabase(array $databaseData, string $table, int $iterationCount, ?int $repeatCount = null)
     {
         if (!empty($databaseData)) {
             if ($this->options['mode'] === 'update') {
@@ -251,7 +253,7 @@ class SaveRepeatableToDatabaseFinisher extends \TYPO3\CMS\Form\Domain\Finishers\
      * Returns a form element object for a given identifier.
      *
      * @param string $elementIdentifier
-     * @return FormElementInterface|null
+     * @return \TYPO3\CMS\Form\Domain\Model\FormElements\FormElementInterface|null
      */
     protected function getElementByIdentifier(string $elementIdentifier)
     {
