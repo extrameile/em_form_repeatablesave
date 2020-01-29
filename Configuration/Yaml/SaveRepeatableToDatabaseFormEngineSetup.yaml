@@ -1,0 +1,10 @@
+TYPO3:
+  CMS:
+    Form:
+      prototypes:
+        standard:
+          finishersDefinition:
+            SaveRepeatableToDatabase:
+              formEngine:
+                label: 'SaveRepeatableToDatabase Finisher'
+              implementationClassName: 'Extrameile\EmFormRepeatablesave\Form\Finisher\SaveRepeatableToDatabaseFinisher'

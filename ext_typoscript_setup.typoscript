@@ -1,0 +1,9 @@
+// The configurations in the registered file are meant for the Form Editor module.
+module.tx_form.settings.yamlConfigurations {
+    234 = EXT:em_form_repeatablesave/Configuration/Yaml/SaveRepeatableToDatabaseFormEditorSetup.yaml
+}
+
+// The configurations in the registered file are meant for the frontend plugin
+plugin.tx_form.settings.yamlConfigurations {
+    234 = EXT:em_form_repeatablesave/Configuration/Yaml/SaveRepeatableToDatabaseFormEngineSetup.yaml
+}

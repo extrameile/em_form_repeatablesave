@@ -1,0 +1,29 @@
+TYPO3:
+  CMS:
+    Form:
+      prototypes:
+        standard:
+          finishersDefinition:
+            SaveRepeatableToDatabase:
+              formEditor:
+                label: 'Save repeatable into database'
+                iconIdentifier: 't3-form-icon-finisher'
+          formElementsDefinition:
+            Form:
+              formEditor:
+                editors:
+                  900:
+                    selectOptions:
+                      1576505658:
+                        value: 'SaveRepeatableToDatabase'
+                        label: 'Save repeatable into database'
+
+                propertyCollections:
+                  finishers:
+                    1576505658:
+                      identifier: 'SaveRepeatableToDatabase'
+                      editors:
+                        __inheritances:
+                          10: 'TYPO3.CMS.Form.mixins.formElementMixins.BaseCollectionEditorsMixin'
+                        100:
+                          label: 'Save repeatable into database'
