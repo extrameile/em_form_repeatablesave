@@ -48,7 +48,6 @@
     },
     "require-dev": {
         "typo3/testing-framework": "^4.14.0",
-        "extrameile/grumphp-conventions-typo3": "dev-master",
-        "vimeo/psalm": "^3.8"
+        "extrameile/grumphp-conventions-typo3": "dev-master"
     }
 }
