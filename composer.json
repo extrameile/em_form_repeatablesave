@@ -6,7 +6,7 @@
         "TYPO3",
         "extension"
     ],
-    "homepage": "https://templavoila.plus/",
+    "homepage": "https://www.extrameile-gehen.de/",
     "license": ["GPL-2.0+"],
     "authors": [
         {
@@ -30,7 +30,6 @@
         }
     },
     "replace": {
-        "extrameile/em_form_repeatablesave": "self.version",
         "typo3-ter/em_form_repeatablesave": "self.version"
     },
     "config": {
