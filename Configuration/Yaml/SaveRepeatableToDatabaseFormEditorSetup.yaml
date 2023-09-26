@@ -23,7 +23,7 @@ TYPO3:
                     1576505658:
                       identifier: 'SaveRepeatableToDatabase'
                       editors:
-                        __inheritances:
-                          10: 'TYPO3.CMS.Form.mixins.formElementMixins.BaseCollectionEditorsMixin'
                         100:
+                          identifier: header
+                          templateName: Inspector-CollectionElementHeaderEditor
                           label: 'Save repeatable into database'

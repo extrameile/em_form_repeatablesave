@@ -17,9 +17,9 @@
         }
     ],
     "require": {
-        "typo3/cms-core": "^8.7.0 || ^9.5.0 || ^10.4.0",
-        "typo3/cms-form": "^8.7.0 || ^9.5.0 || ^10.4.0",
-        "php": ">=7.2.0 <7.4.99"
+        "typo3/cms-core": "^8.7.0 || ^9.5.0 || ^10.4.0 || ^11.5.0",
+        "typo3/cms-form": "^8.7.0 || ^9.5.0 || ^10.4.0 || ^11.5.0",
+        "php": ">=7.2.0 <7.4.99 || >8.0.0"
     },
     "suggest": {
         "tritum/repeatable-form-elements": "You may want the repeatable container from TRITUM"
