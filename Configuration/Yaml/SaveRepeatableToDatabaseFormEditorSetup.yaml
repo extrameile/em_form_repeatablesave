@@ -7,7 +7,7 @@ TYPO3:
             SaveRepeatableToDatabase:
               formEditor:
                 label: 'Save repeatable into database'
-                iconIdentifier: 't3-form-icon-finisher'
+                iconIdentifier: form-finisher
           formElementsDefinition:
             Form:
               formEditor:
@@ -27,3 +27,6 @@ TYPO3:
                           identifier: header
                           templateName: Inspector-CollectionElementHeaderEditor
                           label: 'Save repeatable into database'
+                        9999:
+                          identifier: removeButton
+                          templateName: Inspector-RemoveElementEditor
